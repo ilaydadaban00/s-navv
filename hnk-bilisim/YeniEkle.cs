@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace hnk_bilisim
                     // MessageBox.Show("Kayıt Eklendi!");
                     // this.Close(); 
                 }
+               
 
             }
             
@@ -52,6 +54,11 @@ namespace hnk_bilisim
 
         private void YeniEkle_Load(object sender, EventArgs e)
         {
+            string klasorYolu = @"fotograf_adi";
+            if (!Directory.Exists(klasorYolu))
+            {
+                Directory.CreateDirectory(klasorYolu);
+            }
             CmbDoldur();
         }
         void CmbDoldur()
@@ -74,6 +81,29 @@ namespace hnk_bilisim
                 cmbCins.DisplayMember = "cins";   //ekranda kullanıcı görür
                 cmbCins.ValueMember = "cins";     //veritabanına kayıt edilir
             }
+        }
+
+        private void pbResim_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            DialogResult result = openFileDialog.ShowDialog(this);
+
+            if (result != DialogResult.OK) return;
+
+            string kaynakDosya = openFileDialog.FileName;
+            yeniAd= Guid.NewGuid().ToString() + Path.GetExtension(kaynakDosya);
+            string hedefDosya = Path.Combine(Environment.CurrentDirectory, "fotograf_adi", yeniAd);
+
+            File.Copy(kaynakDosya, hedefDosya);
+
+            pbResim.ImageLocation = null;
+
+            if (File.Exists(hedefDosya))
+            {
+                pbResim.ImageLocation = hedefDosya;
+                pbResim.SizeMode = PictureBoxSizeMode.StretchImage;
+            }
+
         }
     }
 }

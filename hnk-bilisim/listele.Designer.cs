@@ -82,6 +82,7 @@
             this.pbResim.Size = new System.Drawing.Size(133, 199);
             this.pbResim.TabIndex = 13;
             this.pbResim.TabStop = false;
+            this.pbResim.Click += new System.EventHandler(this.pbResim_Click);
             // 
             // cbEngel
             // 

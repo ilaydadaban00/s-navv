@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace hnk_bilisim
     public partial class listele : Form
     {
         string baglanti = "Server=localhost;Database=barinak;Uid=root;Pwd=;";
+        string yeniad = "";
         public listele()
         {
             InitializeComponent();
@@ -31,10 +33,15 @@ namespace hnk_bilisim
                 cmd.Parameters.AddWithValue("@yas",txtYeniYas.Text);
                 cmd.Parameters.AddWithValue("@cins", cmbCinsi.Text);
                 cmd.Parameters.AddWithValue("@engel_durumu", cbEngel.Checked);
-                cmd.Parameters.AddWithValue("@fotograf_adi", pbResim.Text);
+                
 
                 int id = Convert.ToInt32(dgwHayvanlar.SelectedRows[0].Cells["id"].Value);
                 cmd.Parameters.AddWithValue("@satirid", id);
+
+               
+
+
+                cmd.Parameters.AddWithValue("@fotograf_adi",yeniad);
 
 
                 cmd.ExecuteNonQuery();
@@ -98,6 +105,11 @@ namespace hnk_bilisim
 
         private void listele_Load(object sender, EventArgs e)
         {
+            string klasorYolu = @"fotograf_adi";
+            if (!Directory.Exists(klasorYolu))
+            {
+                Directory.CreateDirectory(klasorYolu);
+            }
             DgwDoldur();
         }
         void DgwDoldur()
@@ -114,6 +126,7 @@ namespace hnk_bilisim
 
                 da.Fill(dt);
                 dgwHayvanlar.DataSource = dt;
+               // dgwFilmler.Columns["poster"].Visible = false;
             }
         }
 
@@ -125,8 +138,43 @@ namespace hnk_bilisim
                 txtYeniYas.Text = dgwHayvanlar.SelectedRows[0].Cells["yas"].Value.ToString();
                cmbCinsi.Text = dgwHayvanlar.SelectedRows[0].Cells["cins"].Value.ToString();
                 cbEngel.Text = dgwHayvanlar.SelectedRows[0].Cells["engel_durumu"].Value.ToString();
-               // pbResim.Value = Convert.ToDateTime(dgwHayvanlar.SelectedRows[0].Cells["fotograf_adi"].Value);
-                
+                // pbResim.Value = Convert.ToDateTime(dgwHayvanlar.SelectedRows[0].Cells["fotograf_adi"].Value);
+           
+
+                string dosyaYolu = Path.Combine(Environment.CurrentDirectory, "fotograf_adi", dgwHayvanlar.SelectedRows[0].Cells["fotograf_adi"].Value.ToString());
+
+                //önce resimi temizle
+                pbResim.Image = null;
+
+                //varsa zaten gösterir
+                if (File.Exists(dosyaYolu))
+                {
+                    pbResim.Image = Image.FromFile(dosyaYolu);
+                    pbResim.SizeMode = PictureBoxSizeMode.StretchImage;
+                }
+
+            }
+        }
+
+        private void pbResim_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            DialogResult result = openFileDialog.ShowDialog(this);
+
+            if (result != DialogResult.OK) return;
+
+            string kaynakDosya = openFileDialog.FileName;
+            yeniad = Guid.NewGuid().ToString() + Path.GetExtension(kaynakDosya);
+            string hedefDosya = Path.Combine(Environment.CurrentDirectory, "fotograf_adi", yeniad);
+
+            File.Copy(kaynakDosya, hedefDosya);
+
+            pbResim.Image = null;
+
+            if (File.Exists(hedefDosya))
+            {
+                pbResim.Image = Image.FromFile(hedefDosya);
+                pbResim.SizeMode = PictureBoxSizeMode.StretchImage;
             }
         }
     }
